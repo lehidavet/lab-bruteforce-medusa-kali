@@ -34,6 +34,19 @@ medusa -h 192.168.127.5 -U wordlists/usuarios.txt -P wordlists/senhas.txt -M ftp
 
 ![Evidência de brute force em FTP](images/ftp_bruteforce.png)
 
+### Validação de Acesso com smbclient
+
+Após identificar as credenciais válidas pelo Medusa (`msfadmin/msfadmin`), validei o acesso ao compartilhamento SMB utilizando o smbclient a partir do Kali Linux:
+
+```bash
+smbclient -L 192.168.127.5 -U msfadmin
+smbclient //192.168.127.5/tmp -U msfadmin
+```
+
+![Evidência Validação de smbclient](images/smbclient_validacao.png)
+
+Com essas credenciais, consegui listar os compartilhamentos disponíveis e acessar o recurso `tmp`, confirmando na prática que a combinação de usuário e senha descoberta pelo ataque permite interação com o serviço SMB da máquina alvo.
+
 ## Password Spraying em SMB com Medusa
 
 Para simular um ataque de password spraying contra o serviço SMB da máquina Metasploitable 2, reutilizei a mesma lista de usuários e defini uma lista de senhas comuns (`senhas.txt`) para serem testadas em todos os logins.
@@ -55,7 +68,7 @@ medusa -h 192.168.127.5 -U wordlists/usuarios.txt -P senhas.txt -M smbnt -t 2 -T
 
 ![Evidência de password spraying em SMB](images/medusa_smb.png)
 
-Diferentemente da força bruta tradicional, onde muitas senhas são testadas contra um único usuário até encontrar a combinação correta, no password spraying uma mesma senha é testada contra vários usuários. Essa abordagem reduz a chance de disparar políticas de bloqueio de conta baseadas em tentativas consecutivas de falha, ao mesmo tempo em que explora senhas fracas e reutilizadas em serviços de autenticação em rede como o SMB.
+Diferentemente da força bruta tradicional, onde muitas senhas são testadas contra um único usuário até encontrar a combinação correta, no password spraying um pequeno conjunto de senhas comuns é testado contra vários usuários. Essa abordagem reduz a chance de disparar políticas de bloqueio de conta baseadas em tentativas consecutivas de falha, ao mesmo tempo em que explora senhas fracas e reutilizadas em serviços de autenticação em rede como o SMB.
 
 ## Medidas de Mitigação
 
@@ -67,7 +80,15 @@ Com base nos testes realizados, algumas boas práticas para reduzir o risco de a
 - **Monitorar logs de autenticação:** coletar e analisar logs de falhas de login em busca de padrões de brute force ou spraying, integrando com soluções de SIEM/IDS.
 - **Adotar autenticação adicional:** sempre que possível, complementar com MFA e revisões periódicas de contas e permissões.
 
+## Reflexão sobre Força Bruta em Aplicações Web (DVWA)
+
+Além dos testes em protocolos de rede como FTP e SMB, estudei também o módulo de Brute Force da Damn Vulnerable Web Application (DVWA), focado em formulários de login HTTP. Nesse cenário, o atacante automatiza tentativas sucessivas de autenticação contra um formulário web, reaproveitando listas de usuários e senhas de maneira semelhante aos testes em serviços de rede, mas adaptando o ataque para parâmetros HTTP como `username`, `password` e mensagens de erro retornadas pela aplicação.
+
+A DVWA demonstra, em diferentes níveis de dificuldade, como mecanismos adicionais — por exemplo, delays de resposta, tokens CSRF e políticas de bloqueio após um número máximo de tentativas — podem mitigar ataques de força bruta em interfaces web modernas. Esse tipo de laboratório complementa os testes feitos com o Medusa em SMB, mostrando que a lógica de tentativa e erro é reaproveitada em múltiplas camadas (rede e aplicação) e reforçando a importância de combinar boas práticas de desenvolvimento seguro com configurações robustas de autenticação.
+
+
 ## Conclusão
 
 O laboratório demonstrou na prática como ataques automatizados com Medusa podem identificar credenciais fracas em serviços comuns como FTP e SMB em poucos segundos. A experiência reforça a importância de combinar políticas de senha robustas, configuração segura de serviços e monitoramento contínuo para mitigar esse tipo de ameaça em ambientes reais.
 
+Além de reproduzir a lógica de tentativa e erro usada por cibercriminosos em ataques reais, o laboratório reforça como credenciais fracas continuam sendo um vetor crítico mesmo em ambientes que já adotam MFA e soluções baseadas em Inteligência Artificial. O domínio de ferramentas clássicas como o Medusa continua essencial para auditar configurações, identificar falsos-positivos e validar, na prática, a eficácia dos controles de segurança.
