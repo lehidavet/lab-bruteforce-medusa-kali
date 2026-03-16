@@ -2,3 +2,5 @@ admin
 user
 test
 msfadmin
+administrator
+guest
