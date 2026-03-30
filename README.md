@@ -25,7 +25,7 @@ Scan inicial de descoberta:
 nmap -sP 192.168.127.0/24
 ```
 
-[Evidência nmap inicial](images/nmap_inicial.png)
+![Evidência nmap inicial](./images/nmap_inicial.png)
 
 ---
 
